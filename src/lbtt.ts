@@ -1,3 +1,4 @@
+import { TaxBand } from "./TaxBand"
 import { UserError } from "./types"
 
 /**
@@ -15,30 +16,23 @@ export default (priceNum: number) => {
         throw new UserError('Cannot parse negative numbers')
     }
 
-    // structure is [lower bound, percent tax rate]
     const tiers = [
-        [0, 0],
-        [145000, 2],
-        [250000, 5],
-        [325000, 10],
-        [750000, 12],
+        new TaxBand(145000, 2),
+        new TaxBand(250000, 5),
+        new TaxBand(325000, 10),
+        new TaxBand(750000, 12),
     ]
 
     let totalTax = 0
-    let idx = 0
 
-    while (priceNum > 0) {
-        const [lower, rate] = tiers[idx]
-        const finalTier = ++idx >= tiers.length;
-        // higher is not used when finalTier is true so add a safe numerical default to satisfy compiler
-        const [higher, _] = !finalTier ? tiers[idx] : [0,0] 
-
-        const baseAmount = finalTier ? priceNum : Math.min(higher - lower, priceNum)
-        priceNum -= baseAmount
-        // console.log('Base amount to calc tax from:', baseAmount)
-        const taxedAmount = baseAmount * (rate / 100)
-        // console.log(`£${lower}${higher > 0 ? ' - £' + higher : '+'}: ${taxedAmount}`)
-        totalTax += taxedAmount
-    }
+    tiers.reverse().forEach((tier) =>  {
+        if (priceNum > tier.threshold) {
+            const baseAmount = priceNum - tier.threshold
+            const taxedAmount = baseAmount * (tier.rate / 100)
+            priceNum = tier.threshold
+            totalTax += taxedAmount
+        }
+    })
+    
     return parseFloat(totalTax.toFixed(2))
 }

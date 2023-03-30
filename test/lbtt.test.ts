@@ -12,12 +12,25 @@ test('zero value', () => {
 });
 
 /**
- * Test a small number that will hit NO tiers BUT will enter the loop. 
+ * Test a small number that will hit NO tiers.
  */
-test('zero value', () => {
+test('small value', () => {
     expect(lbtt(100000)).toBe(0);
   });
 
+/**
+ * Test a small number that will hit the first tier only.
+ */
+test('check first tier', () => {
+    expect(lbtt(200000)).toBe(1100);
+});
+
+/**
+ * Test a small number that will hit first and second tiers. 
+ */
+test('check second tier', () => {
+    expect(lbtt(300000)).toBe(4600);
+});
 /**
  * Test a number that will hit all tiers. 
  */
